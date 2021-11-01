@@ -1,55 +1,53 @@
 package hw4
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 )
+type wordWithCount struct {
+	word string
+	count int
+}
 
 func topWords(s string, n int) []string {
 	stringMap := countWords(s)
 
-	var values []int
-	for _, v := range stringMap {
-		values = append(values, v)
+	var words []wordWithCount
+	for key, value := range stringMap {
+		words = append(words, wordWithCount{key, value})
 	}
-	sort.Ints(values)
+	sort.Slice(words, func(i, j int) bool { return words[i].count > words[j].count })
 
 	var result []string
+	var buffer []string
 	cnt := 0
-	for i := len(values) - 1; i >= 0; i-- {
+	for i := 0; i < len(words) - 1; i++ {
+		if words[i].count == words[i+1].count {
+			buffer = append(buffer, words[i].word)
+		} else {
+			buffer = append(buffer, words[i].word)
+			sort.Strings(buffer)
+			result = append(result, buffer...)
+			buffer = buffer[:0]
+			cnt++
+		}
 		if cnt == n {
 			break
 		}
-		if i == 0 || values[i] != values[i-1] {
-			var buffer []string
-			for key, val := range stringMap {
-				if val == values[i] {
-					buffer = append(buffer, key)
-				}
-			}
-			sort.Strings(buffer)
-			result = append(result, buffer...)
-			cnt++
-		}
 	}
-	fmt.Println(stringMap)
 	return result
 }
 
 
 func countWords(s string) map[string]int {
-	var str strings.Builder
+	replacer := strings.NewReplacer(",", "",
+		".", "",
+		":", "",
+		"'", "")
+	strArr := strings.Fields(replacer.Replace(s))
 	stringMap := make(map[string]int)
-	for _, v := range s {
-		if v != ' '  {
-			if v == ',' || v == '.' || v == ':' || v == '"' { continue }
-			str.WriteRune(v)
-		} else {
-			stringMap[str.String()]++
-			str.Reset()
-		}
+	for _, v := range strArr {
+		stringMap[v]++
 	}
-	stringMap[str.String()]++
 	return stringMap
 }
