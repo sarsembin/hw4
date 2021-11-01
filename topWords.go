@@ -16,21 +16,20 @@ func topWords(s string, n int) []string {
 	for key, value := range stringMap {
 		words = append(words, wordWithCount{key, value})
 	}
-	sort.Slice(words, func(i, j int) bool { return words[i].count > words[j].count })
-
+	sort.Slice(words, func(i, j int) bool {
+		if words[i].count == words[j].count {
+			return strings.Compare(words[i].word, words[j].word) == -1
+		}
+		return words[i].count > words[j].count
+	})
+	
 	var result []string
-	var buffer []string
 	cnt := 0
 	for i := 0; i < len(words) - 1; i++ {
-		if words[i].count == words[i+1].count {
-			buffer = append(buffer, words[i].word)
-		} else {
-			buffer = append(buffer, words[i].word)
-			sort.Strings(buffer)
-			result = append(result, buffer...)
-			buffer = buffer[:0]
+		if words[i].count != words[i+1].count {
 			cnt++
 		}
+		result = append(result, words[i].word)
 		if cnt == n {
 			break
 		}
